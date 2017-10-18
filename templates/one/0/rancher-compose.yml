@@ -1,0 +1,164 @@
+.catalog:
+  name: "one"
+  version: "v0.0.1"
+  description: "OpenNebula Frontend"
+  minimum_rancher_version: v1.0.0
+  questions:
+    - variable: "mysql_root_password"
+      description: "Mysql root password"
+      label: "Mysql root password"
+      type: password
+      required: true
+      default: "mysql"
+    - variable: "one_db_name"
+      description: "OpenNebula Database Name"
+      label: "OpenNebula Database Name"
+      type: string
+      required: true
+      default: "opennebula"
+    - variable: "one_db_username"
+      description: "OpenNebula Database Username"
+      label: "OpenNebula Database Name"
+      type: string
+      required: true
+      default: "oneadmin"
+    - variable: "one_db_password"
+      description: "OpenNebula Database Password"
+      label: "OpenNebula Database Name"
+      type: password
+      required: true
+      default: "oneadmin"
+    - variable: "oneadmin_password"
+      description: "OpenNebula Admin Password"
+      label: "OpenNebula Admin Password"
+      type: password
+      required: true
+      default: "oneadmin"
+    - variable: "sunstone_listen_address"
+      description: "Sunstone Listen Address"
+      label: "Sunstone Listen Address"
+      type: string
+      required: true
+      default: "0.0.0.0"
+    - variable: "web_port"
+      description: "Sunstone Http Port"
+      label: "Sunstone Http Port"
+      type: int
+      required: true
+      default: 9869
+    - variable: "vnc_proxy_port"
+      description: "VNC Proxy Port"
+      label: "VNC Proxy Port"
+      type: int
+      required: true
+      default: 29876
+    - variable: "service_domain"
+      description: "Domain of the Service (StackName.EnvironmentName.DNSZone)"
+      label: "Domain of the service"
+      type: string
+      required: true
+      default: "one.demoone.local"
+    - variable: "ec2_hostname"
+      description: "ec2 Hostname - (ServiceName)"
+      label: "EC2 Hostname"
+      type: string
+      required: true
+      default: "ec2"
+
+version: '2'
+services:
+  cloud:
+    scale: 1
+    load_balancer_config:
+      lb_cookie_stickiness_policy:
+        nome: cloud-one-user
+        cookie: cloud-one-user
+        domain: ${domain}
+        indirect: false
+        nocache: false
+        postonly: false
+        mode: insert
+      haproxy_config: { }
+    health_check:
+      port: 42
+      interval: 2000
+      unhealthy_threshold: 3
+      request_line: ''
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+
+  sunstone:
+    scale: 2
+    health_check:
+      port: 9869
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+
+  ec2:
+    scale: 1
+    health_check:
+      port: 4567
+      request_line: ''
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+
+  oneflow:
+    scale: 1
+    health_check:
+      port: 2474
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+
+  onegate:
+    scale: 1
+    health_check:
+      port: 5030
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+
+  oned:
+    scale: 1
+    health_check:
+      port: 2633
+      request_line: ''
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+    metadata:
+      oneadmin:
+        password: ${oneadmin_password}
+      sunstone:
+        listen_address: ${sunstone_listen_address}
+        vnc_proxy_port: ${vnc_proxy_port}
+      econe:
+        fqdn: ${ec2_hostname}.${service_domain}
+
+  mysql:
+    health_check:
+      port: 3306
+      request_line: ''
+      interval: 2000
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+      response_timeout: 2000
+      strategy: recreate
+    metadata:
+      one_db:
+        name: ${one_db_name}
+        username: ${one_db_username}
+        password: ${one_db_password}

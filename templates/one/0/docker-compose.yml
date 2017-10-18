@@ -1,0 +1,134 @@
+version: '2'
+services:
+  cloud:
+    ports:
+      - ${web_port}:9869
+      - ${vnc_proxy_port}:${vnc_proxy_port}
+    image: rancher/load-balancer-service
+    links:
+      - sunstone
+    stdin_open: true
+    tty: true
+    labels:
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  sunstone:
+    image: km4rcus/sunstone:v5.4-ubuntu
+    expose:
+     - 9869
+     - ${vnc_proxy_port}
+    volumes:
+      - one_etc:/etc/one:ro
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+      - one_upload:/var/tmp
+    labels:
+      io.rancher.scheduler.affinity:host_label: node=service
+      io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
+
+  ec2:
+    image: km4rcus/econe:v5.4-ubuntu
+    expose:
+      - 4567
+    volumes:
+      - one_etc:/etc/one:ro
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+    hostname: ${ec2_hostname}.${service_domain}
+    labels:
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  oneflow:
+    image: km4rcus/oneflow:v5.4-ubuntu
+    expose:
+      - 2474
+    volumes:
+      - one_etc:/etc/one:ro
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+    labels:
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  onegate:
+    image: km4rcus/onegate:v5.4-ubuntu
+    expose:
+      - 5030
+    volumes:
+      - one_etc:/etc/one:ro
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+    labels:
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  oned:
+    image: km4rcus/oned:v5.4-ubuntu
+    ports:
+      - 2633:2633
+    volumes:
+      - one_etc:/etc/one:ro
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+      - one_upload:/var/tmp
+      - one_datastores:/var/lib/one/datastores
+    labels:
+      io.rancher.scheduler.affinity:container_label: io.rancher.stack_service.name=$${stack_name}/mysql
+      io.rancher.scheduler.affinity:host_label: node=service
+      io.rancher.sidekicks: onebootstrap, oneconfig
+
+  onebootstrap:
+    image: km4rcus/onebootstrap:v5.4-ubuntu
+    stdin_open: true
+    tty: true
+    volumes:
+      - one_etc:/etc/one
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+    labels:
+      io.rancher.container.start_once: true
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  oneconfig:
+    image: km4rcus/oneconfig:v5.4-ubuntu
+    stdin_open: true
+    tty: true
+    volumes:
+      - one_etc:/etc/one
+      - one_auth:/var/lib/one
+      - one_log:/var/log/one
+    labels:
+      io.rancher.container.start_once: true
+      io.rancher.scheduler.affinity:host_label: node=service
+
+  mysql:
+    image: mysql
+    expose:
+      - 3306
+    volumes:
+      - one_db:/var/lib/mysql
+    volume_driver: rancher-nfs
+    environment:
+     - MYSQL_ROOT_PASSWORD=${mysql_root_password}
+     - MYSQL_DATABASE=${one_db_name}
+     - MYSQL_USER=${one_db_username}
+     - MYSQL_PASSWORD=${one_db_password}
+    labels:
+       io.rancher.scheduler.affinity:host_label: node=service
+
+volumes:
+  one_etc:
+    driver: rancher-nfs
+
+  one_auth:
+    driver: rancher-nfs
+
+  one_log:
+    driver: rancher-nfs
+
+  one_upload:
+    driver: rancher-nfs
+
+  one_datastores:
+    driver: rancher-nfs
+
+  one_db:
+    driver: rancher-nfs
