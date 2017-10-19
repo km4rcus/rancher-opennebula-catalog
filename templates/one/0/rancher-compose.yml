@@ -1,5 +1,5 @@
 .catalog:
-  name: "one"
+  name: "OpenNebula Frontend"
   version: "v0.0.1"
   description: "OpenNebula Frontend"
   minimum_rancher_version: v1.0.0
