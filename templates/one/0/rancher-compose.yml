@@ -64,6 +64,12 @@
       type: string
       required: true
       default: "ec2"
+    - variable: "repo"
+      description: "Image repository"
+      label: "Image repository"
+      type: string
+      required: true
+      default: "km4rcus"
 
 version: '2'
 services:

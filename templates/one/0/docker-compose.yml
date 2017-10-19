@@ -13,7 +13,7 @@ services:
       io.rancher.scheduler.affinity:host_label: node=service
 
   sunstone:
-    image: km4rcus/sunstone:v5.4-ubuntu
+    image: ${repo}/sunstone:v5.4-ubuntu
     expose:
      - 9869
      - ${vnc_proxy_port}
@@ -27,7 +27,7 @@ services:
       io.rancher.scheduler.affinity:container_label_soft_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
 
   ec2:
-    image: km4rcus/econe:v5.4-ubuntu
+    image: ${repo}/econe:v5.4-ubuntu
     expose:
       - 4567
     volumes:
@@ -39,7 +39,7 @@ services:
       io.rancher.scheduler.affinity:host_label: node=service
 
   oneflow:
-    image: km4rcus/oneflow:v5.4-ubuntu
+    image: ${repo}/oneflow:v5.4-ubuntu
     expose:
       - 2474
     volumes:
@@ -50,7 +50,7 @@ services:
       io.rancher.scheduler.affinity:host_label: node=service
 
   onegate:
-    image: km4rcus/onegate:v5.4-ubuntu
+    image: ${repo}/onegate:v5.4-ubuntu
     expose:
       - 5030
     volumes:
@@ -61,7 +61,7 @@ services:
       io.rancher.scheduler.affinity:host_label: node=service
 
   oned:
-    image: km4rcus/oned:v5.4-ubuntu
+    image: ${repo}/oned:v5.4-ubuntu
     ports:
       - 2633:2633
     volumes:
@@ -76,7 +76,7 @@ services:
       io.rancher.sidekicks: onebootstrap, oneconfig
 
   onebootstrap:
-    image: km4rcus/onebootstrap:v5.4-ubuntu
+    image: ${repo}/onebootstrap:v5.4-ubuntu
     stdin_open: true
     tty: true
     volumes:
@@ -88,7 +88,7 @@ services:
       io.rancher.scheduler.affinity:host_label: node=service
 
   oneconfig:
-    image: km4rcus/oneconfig:v5.4-ubuntu
+    image: ${repo}/oneconfig:v5.4-ubuntu
     stdin_open: true
     tty: true
     volumes:
