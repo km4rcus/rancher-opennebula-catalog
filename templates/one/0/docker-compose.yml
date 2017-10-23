@@ -64,6 +64,7 @@ services:
     image: ${repo}/oned:v5.4-ubuntu
     ports:
       - 2633:2633
+      - 4124:4124
     volumes:
       - one_etc:/etc/one:ro
       - one_auth:/var/lib/one
